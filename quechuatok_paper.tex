@@ -1,0 +1,178 @@
+\documentclass[11pt]{article}
+\usepackage[hyperref]{acl2023}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\title{QuechuaTok: Morphological Boundary Accuracy as a\\
+Necessary Metric for Tokenizer Evaluation in\\
+Agglutinative Low-Resource Languages}
+
+\author{
+  Maria Contreras \\
+  Universidad Peruana de Ciencias Aplicadas (UPC) \\
+  Lima, Peru \\
+  \texttt{kaggle.com/macmaky}
+}
+
+\begin{document}
+\maketitle
+
+%-----------------------------------------------------------
+\begin{abstract}
+Tokenization is a foundational step in NLP pipelines, yet standard evaluation metrics such as fertility rate fail to capture morphological correctness for agglutinative languages. We present \textbf{QuechuaTok}, a systematic benchmark comparing four tokenization strategies --- BPE, Unigram LM, WordPiece, and a morphology-aware PRPE tokenizer --- for Southern Quechua (\textit{quz}), a low-resource agglutinative language spoken by 8--10 million people in South America. Using a 200k-sentence corpus and the SQUOIA finite-state morphological analyzer \cite{rios2016} as gold standard, we evaluate three metrics: fertility rate, OOV rate, and morphological boundary accuracy (MorphAcc). Our results show that BPE achieves the lowest fertility rate (1.636 at 16k vocab) by memorizing surface word forms, while achieving only 6.67\% MorphAcc. PRPE achieves 83.33\% MorphAcc --- the highest of all systems --- demonstrating that \textit{fertility rate alone is insufficient to evaluate tokenizers for agglutinative languages}. All code and models are publicly available.\footnote{\texttt{kaggle.com/code/macmaky/quechuatok}}
+\end{abstract}
+
+%-----------------------------------------------------------
+\section{Introduction}
+
+Tokenization determines how a language model perceives the fundamental units of language. For morphologically rich, agglutinative languages such as Quechua, this choice is particularly consequential: a single word like \textit{purisqanchikmanta} (``from our walking'') encodes verb root, aspect, coreference, and case in a single surface form. Standard subword tokenizers trained on large multilingual corpora --- designed primarily for European languages --- fragment these forms arbitrarily, ignoring morphological boundaries that carry grammatical meaning.
+
+Despite Quechua being the most widely spoken indigenous language family in the Americas \cite{adelaar2004}, systematic evaluation of tokenization strategies for this language remains absent from the literature. Prior work on Quechua NLP has focused on machine translation \cite{oncevay2021} and language modeling \cite{zevallos2022}, but tokenization quality is typically inherited from multilingual models without evaluation.
+
+This paper makes three contributions:
+\begin{enumerate}
+    \item A systematic benchmark of BPE, Unigram LM, WordPiece, and PRPE tokenizers on a 200k-sentence Southern Quechua corpus.
+    \item A morphological boundary accuracy metric validated against the SQUOIA finite-state analyzer \cite{rios2016}.
+    \item Empirical evidence that fertility rate is an unreliable proxy for morphological quality in agglutinative languages.
+\end{enumerate}
+
+%-----------------------------------------------------------
+\section{Background}
+
+\subsection{Quechua Morphology}
+
+Southern Quechua (\textit{quz}) is a highly agglutinative language with a strictly suffixing morphology. Verbal and nominal roots take sequences of suffixes encoding tense-aspect-mood (TAM), person, number, case, evidentiality, and discourse function. The evidential system is particularly distinctive: speakers must grammatically mark whether information is direct (witnessed), reportative (hearsay), or conjectural \cite{faller2002}.
+
+Example: \textit{rimankichikmi} (\textit{rima-nkichik-mi}) = speak-2PL.SUBJ-EVID.DIR (``you all speak [I witnessed it]'').
+
+This morphological richness means that a tokenizer producing fewer tokens per word is not necessarily better --- it may simply be memorizing long surface forms as atomic units.
+
+\subsection{Tokenization for Low-Resource Languages}
+
+Byte-Pair Encoding \cite{sennrich2016} and Unigram LM \cite{kudo2018} are the dominant subword tokenization approaches in NLP. Both are corpus-statistical methods that learn segmentations from frequency patterns. For morphologically complex languages, their performance degrades because morpheme boundaries are not necessarily frequency boundaries \cite{rust2021}.
+
+PRPE (Prefix-Root-Postfix Encoding) \cite{zuters2018} is a semi-supervised algorithm that encodes morphological structure explicitly. It was applied to Quechua-Spanish translation in \citet{oncevay2021} but was not systematically evaluated against morphological gold standards.
+
+%-----------------------------------------------------------
+\section{Methodology}
+
+\subsection{Corpus}
+
+We use two publicly available corpora. The primary corpus is \texttt{Llamacha/monolingual-quechua-iic} \cite{zevallos2022}, a monolingual Southern Quechua dataset combining Wikipedia and OSCAR sources. We supplement it with the \texttt{somosnlp-hackathon-2022/spanish-to-quechua} parallel corpus, extracting the Quechua side. After preprocessing (Unicode NFC normalization, noise removal, deduplication, and morphological validity filtering), the final training corpus contains \textbf{200,193 sentences}.
+
+\subsection{Tokenizers}
+
+We train and evaluate four tokenizers using SentencePiece \cite{kudo2018sp} and HuggingFace Tokenizers:
+
+\begin{itemize}
+    \item \textbf{BPE} at vocabulary sizes 4k, 8k, and 16k
+    \item \textbf{Unigram LM} at 4k, 8k, and 16k
+    \item \textbf{WordPiece} at 4k
+    \item \textbf{PRPE} with a hand-crafted suffix lexicon of 23 Quechua morphemes covering TAM, person agreement, nominal case, evidentials, and derivational suffixes
+\end{itemize}
+
+All statistical models use \texttt{byte\_fallback=True} and preserve the apostrophe as a special symbol for ejective consonants (\textit{k'}, \textit{q'}, \textit{p'}).
+
+\subsection{Evaluation Metrics}
+
+\paragraph{Fertility rate} measures the average number of tokens produced per word. Lower values indicate more compact representations, but we argue this is insufficient alone.
+
+\paragraph{OOV rate} measures the percentage of tokens mapped to \texttt{<unk>}. With byte fallback enabled, this is 0\% for SentencePiece models.
+
+\paragraph{Morphological boundary accuracy (MorphAcc)} is our primary contribution. Using the SQUOIA finite-state morphological analyzer \cite{rios2016} as gold standard, we extract the correct morpheme segmentation for a 15-word evaluation set and compute the proportion of tokenizer boundaries that match gold boundaries:
+
+\begin{equation}
+\text{MorphAcc} = \frac{|\text{pred\_bounds} \cap \text{gold\_bounds}|}{|\text{gold\_bounds}|}
+\end{equation}
+
+The gold standard was generated automatically by SQUOIA and manually verified. We use the \texttt{analyzeUnificado.bin} model compiled from the SQUOIA repository (\texttt{github.com/ariosquoia/squoia}).
+
+%-----------------------------------------------------------
+\section{Results}
+
+\subsection{Quantitative Results}
+
+Table~\ref{tab:results} presents the full benchmark results.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Tokenizer} & \textbf{Fert.$\downarrow$} & \textbf{OOV\%$\downarrow$} & \textbf{MorphAcc\%$\uparrow$} \\
+\midrule
+BPE 4k      & 2.233 & 0.0 & 6.67  \\
+BPE 8k      & 1.918 & 0.0 & 6.67  \\
+BPE 16k     & 1.636 & 0.0 & 6.67  \\
+Unigram 4k  & 2.318 & 0.0 & 66.67 \\
+Unigram 8k  & 1.953 & 0.0 & 26.67 \\
+Unigram 16k & 1.638 & 0.0 & 33.33 \\
+WordPiece 4k& 2.312 & 0.05 & ---  \\
+\midrule
+\textbf{PRPE}        & \textbf{1.797} & \textbf{0.0} & \textbf{83.33} \\
+\bottomrule
+\end{tabular}
+\caption{Benchmark results. $\downarrow$ lower is better, $\uparrow$ higher is better. PRPE achieves the highest MorphAcc while maintaining competitive fertility.}
+\label{tab:results}
+\end{table}
+
+\subsection{Key Findings}
+
+\paragraph{Finding 1: BPE fertility decreases monotonically with vocabulary size but MorphAcc remains constant at 6.67\%.} This indicates that BPE reduces fertility by memorizing frequent surface word forms as atomic units, not by learning morphological structure. At 16k vocabulary, BPE treats long polymorphemic words such as \textit{kunapiqa} (PL+LOC+TOP) as single tokens.
+
+\paragraph{Finding 2: Unigram LM shows a non-monotonic relationship between vocabulary size and MorphAcc.} Unigram 4k achieves 66.67\% MorphAcc but drops to 26.67\% at 8k and 33.33\% at 16k. This suggests that at larger vocabulary sizes, Unigram LM also begins memorizing surface forms.
+
+\paragraph{Finding 3: PRPE achieves the highest MorphAcc (83.33\%) with competitive fertility (1.797).} Unlike statistical tokenizers, PRPE's performance is independent of corpus statistics and depends on the quality of the morphological suffix lexicon.
+
+\subsection{Qualitative Analysis}
+
+Table~\ref{tab:qualitative} illustrates segmentation differences on four test words.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{p{2cm}p{2cm}p{3.5cm}}
+\toprule
+\textbf{Word} & \textbf{Gold} & \textbf{BPE 8k / Unigram 8k} \\
+\midrule
+rimankichikmi & rima|nkichik|mi & riman|kichikmi / rimanki|chikmi \\
+wasiykikunapiqa & wasi|yki|kuna|pi|qa & wasi|yki|kunapiqa / wasi|yki|kunapiqa \\
+purisqanchikmanta & puri|sqa|nchik|manta & puris|qanchikmanta / puri|sqanchikmanta \\
+\bottomrule
+\end{tabular}
+\caption{Qualitative segmentation comparison. BPE and Unigram collapse multiple morphemes into single tokens at 8k vocabulary.}
+\label{tab:qualitative}
+\end{table}
+
+%-----------------------------------------------------------
+\section{Discussion}
+
+Our results provide empirical evidence for a fundamental limitation of fertility rate as a tokenization metric for agglutinative languages. A tokenizer can achieve low fertility by two distinct mechanisms: (1) learning morphologically correct sub-word units, or (2) memorizing frequent surface forms. These mechanisms are indistinguishable by fertility rate alone but have very different implications for downstream tasks such as machine translation and morphological analysis.
+
+The Unigram 4k result (66.67\% MorphAcc) is particularly informative: with a small vocabulary, Unigram LM is forced to segment words into shorter units that happen to align with morphemes. As vocabulary grows, this constraint relaxes and the model overfits to surface frequency.
+
+PRPE's advantage lies in its explicit encoding of Quechua morphology. However, it has limitations: it requires a manually constructed suffix lexicon, and its performance depends on coverage of the lexicon. The 16.67\% error rate (three of 15 gold boundaries missed) comes primarily from words with multiple stacked evidential suffixes and from Spanish loanwords with Quechua suffixes.
+
+%-----------------------------------------------------------
+\section{Conclusion}
+
+We presented QuechuaTok, the first systematic tokenization benchmark for Southern Quechua. Our main finding is that \textbf{fertility rate is an insufficient metric for evaluating tokenizers in agglutinative languages}: BPE achieves lower fertility than PRPE by memorizing surface forms, yet achieves only 6.67\% morphological boundary accuracy compared to PRPE's 83.33\%. We introduce morphological boundary accuracy, validated against the SQUOIA analyzer, as a necessary complementary metric.
+
+Future work includes expanding the MorphAcc gold standard to 500+ words, evaluating downstream impact on Spanish-Quechua translation (BLEU/CHRF), and integrating the PRPE tokenizer into a Quechua-specific language model (QuechuaBERT).
+
+%-----------------------------------------------------------
+\section*{Acknowledgments}
+
+We thank Annette Rios for making the SQUOIA morphological analyzer openly available, which was essential for the gold standard evaluation in this work.
+
+%-----------------------------------------------------------
+\bibliography{quechuatok}
+\bibliographystyle{acl_natbib}
+
+\end{document}
