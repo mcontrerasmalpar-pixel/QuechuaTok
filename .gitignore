@@ -1,0 +1,7 @@
+data/
+models/
+squoia/
+*.png
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
