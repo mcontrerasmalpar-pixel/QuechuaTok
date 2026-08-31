@@ -1,0 +1,22 @@
+{
+  "source": "SQUOIA analyzer (Rios, 2016), manually verified in QuechuaTok_v5_final.ipynb",
+  "n_words": 15,
+  "metric": "morpheme_boundary_accuracy = |pred_morphemes ∩ silver_morphemes| / |silver_morphemes| (string overlap, not character offsets)",
+  "items": [
+    {"word": "rimani", "squoia": "=hablar+1.Sg.Subj", "morphemes": ["rima", "ni"]},
+    {"word": "rimanki", "squoia": "=hablar+2.Sg.Subj", "morphemes": ["rima", "nki"]},
+    {"word": "riman", "squoia": "=hablar+3.Sg.Subj", "morphemes": ["rima", "n"]},
+    {"word": "rimanchik", "squoia": "=hablar+1.Pl.Incl.Subj", "morphemes": ["rima", "nchik"]},
+    {"word": "rimanku", "squoia": "=hablar+3.Pl.Subj", "morphemes": ["rima", "nku"]},
+    {"word": "apani", "squoia": "=llevar+1.Sg.Subj", "morphemes": ["apa", "ni"]},
+    {"word": "apanki", "squoia": "=llevar+2.Sg.Subj", "morphemes": ["apa", "nki"]},
+    {"word": "apan", "squoia": "=llevar+3.Sg.Subj", "morphemes": ["apa", "n"]},
+    {"word": "purin", "squoia": "=andar+3.Sg.Subj", "morphemes": ["puri", "n"]},
+    {"word": "purinki", "squoia": "=andar+2.Sg.Subj", "morphemes": ["puri", "nki"]},
+    {"word": "wasipi", "squoia": "=casa+Loc", "morphemes": ["wasi", "pi"]},
+    {"word": "mikhuni", "squoia": "=comer+1.Sg.Subj", "morphemes": ["mikhu", "ni"]},
+    {"word": "mikhuyki", "squoia": "=comer+1.Sg.Subj_2.Sg.Obj", "morphemes": ["mikhu", "yki"]},
+    {"word": "allin", "squoia": "=bien,bueno", "morphemes": ["allin"]},
+    {"word": "allinmi", "squoia": "=bien,bueno+DirE", "morphemes": ["allin", "mi"]}
+  ]
+}

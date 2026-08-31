@@ -4,6 +4,7 @@
 
 **Author:** Maria Contreras ([@macmaky](https://www.kaggle.com/macmaky))
 **Paper:** https://arxiv.org/abs/2606.23943
+**Code:** [GitHub](https://github.com/mcontrerasmalpar-pixel/QuechuaTok) · [Kaggle](https://www.kaggle.com/code/macmaky/quechuatok)
 
 QuechuaTok is a comparative benchmark of subword tokenizers for Southern
 Quechua, a low-resource, highly agglutinative language. It trains and
@@ -84,16 +85,17 @@ standard derived from the SQUOIA finite-state morphological analyzer
 3. **Unigram 4k has the lowest perplexity** (1344.34), suggesting its segmentation is the most predictable for a downstream language model, despite not having the best fertility or MorphAcc.
 4. **No single tokenizer wins on every metric** — fertility rate alone is an insufficient criterion for evaluating tokenizers on agglutinative, low-resource languages, and should be reported alongside morphological accuracy.
 
-### Qualitative segmentation examples (16k vocab)
+### Qualitative segmentation examples (8k vocab)
 
-| Word | Gold segmentation | BPE 16k | Unigram 16k |
+From paper Table 2. The notebook's 16k qualitative cell did not finish (16k training failed in that run), so this table uses the 8k splits rather than empty 16k cells.
+
+| Word | Gold segmentation | BPE 8k | Unigram 8k |
 |---|---|---|---|
-| `rimankichikmi` | rima \| nkichik \| mi | — | — |
-| `wasiykikunapiqa` | wasi \| yki \| kuna \| pi \| qa | — | — |
-| `purisqanchikmanta` | puri \| sqa \| nchik \| manta | — | — |
-| `munakuwarqanki` | muna \| ku \| wa \| rqa \| nki | — | — |
+| `rimankichikmi` | rima \| nkichik \| mi | riman \| kichikmi | rimanki \| chikmi |
+| `wasiykikunapiqa` | wasi \| yki \| kuna \| pi \| qa | wasi \| yki \| kunapiqa | wasi \| yki \| kunapiqa |
+| `purisqanchikmanta` | puri \| sqa \| nchik \| manta | puris \| qanchikmanta | puri \| sqanchikmanta |
 
-(Run the notebook to see each tokenizer's actual output side by side with the gold segmentation.)
+Gold for `munakuwarqanki` is `muna | ku | wa | rqa | nki` (notebook examples; BPE/Unigram 8k not reported in the paper table).
 
 ## Repository contents
 
@@ -107,17 +109,21 @@ standard derived from the SQUOIA finite-state morphological analyzer
   7. Final benchmark table across all metrics
   8. SQUOIA finite-state analyzer setup (Rios, 2016) and silver-standard morphological evaluation
   9. Bigram perplexity evaluation
+- [`eval/`](eval/) — 15-word MorphAcc gold set, PRPE suffix lexicon, and a script to recompute PRPE MorphAcc without training
+- [`LICENSE`](LICENSE) — MIT
+- [`CITATION.cff`](CITATION.cff)
+- [`requirements.txt`](requirements.txt)
+
+Trained SentencePiece / WordPiece binaries are **not** checked in. The notebook writes them under `models/` (gitignored). Regenerate by running the notebook.
 
 ## Reproducing the results
 
-The notebook is designed to run end-to-end (originally on Kaggle, but works in any
-Jupyter environment with internet access):
-
 ```bash
-pip install datasets sentencepiece tokenizers unicodedata2 pandas matplotlib
+pip install -r requirements.txt
+python eval/score_morphacc_prpe.py
 ```
 
-Then open and run `QuechuaTok_v5_final.ipynb` top to bottom. It will:
+Then open and run `QuechuaTok_v5_final.ipynb` top to bottom (originally on Kaggle; needs internet). It will:
 - Download the corpora from HuggingFace,
 - Create `data/processed/` and `models/` directories,
 - Train all tokenizers locally,
@@ -144,4 +150,4 @@ If you use this work, please cite:
 
 - Rios, A. (2016). *A Basic Language Technology Toolkit for Quechua.* — [SQUOIA repository](https://github.com/ariosquoia/squoia)
 
-**Links:** [arXiv](https://arxiv.org/abs/2606.23943) | [Kaggle](https://kaggle.com/macmaky)
+**Links:** [arXiv](https://arxiv.org/abs/2606.23943) | [GitHub](https://github.com/mcontrerasmalpar-pixel/QuechuaTok) | [Kaggle](https://www.kaggle.com/code/macmaky/quechuatok)

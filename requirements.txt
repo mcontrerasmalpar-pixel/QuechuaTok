@@ -1,0 +1,9 @@
+# Packages imported by QuechuaTok_v5_final.ipynb (Python 3.12.12 on Kaggle).
+# Exact Kaggle pins were not recorded in the notebook.
+datasets
+sentencepiece
+tokenizers
+unicodedata2
+pandas
+matplotlib
+numpy

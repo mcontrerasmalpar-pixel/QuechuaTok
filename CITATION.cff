@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: If you use this work, please cite the paper below.
+title: QuechuaTok
+authors:
+  - family-names: Contreras
+    given-names: Maria
+    alias: macmaky
+url: https://github.com/mcontrerasmalpar-pixel/QuechuaTok
+repository-code: https://github.com/mcontrerasmalpar-pixel/QuechuaTok
+license: MIT
+date-released: "2026-06-30"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Contreras
+      given-names: Maria
+  title: "QuechuaTok: Morphological Boundary Accuracy as a Necessary Metric for Tokenizer Evaluation in Agglutinative Low-Resource Languages"
+  year: 2026
+  url: https://arxiv.org/abs/2606.23943
+  identifiers:
+    - type: other
+      value: "arXiv:2606.23943"
+      description: arXiv preprint
