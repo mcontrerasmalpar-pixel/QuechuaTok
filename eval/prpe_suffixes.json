@@ -1,0 +1,31 @@
+{
+  "description": "PRPE suffix lexicon from QuechuaTok_v5_final.ipynb (SUFFIXES / SUFFIXES_PRPE). Greedy longest-first strip.",
+  "sort": "length descending at load time",
+  "suffixes": [
+    "ni",
+    "nki",
+    "n",
+    "nchik",
+    "nkichik",
+    "nku",
+    "rqa",
+    "sqa",
+    "nqa",
+    "rqan",
+    "sqan",
+    "kuna",
+    "pi",
+    "manta",
+    "wan",
+    "paq",
+    "ta",
+    "qa",
+    "pas",
+    "mi",
+    "si",
+    "cha",
+    "stin",
+    "spa",
+    "na"
+  ]
+}
