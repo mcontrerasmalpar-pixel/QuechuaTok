@@ -15,6 +15,34 @@ on its own: a tokenizer can achieve very low fertility purely by
 memorizing frequent strings, while still producing linguistically
 incorrect morpheme boundaries.
 
+## Install
+
+The PRPE segmenter is installable without training anything:
+
+```bash
+pip install "git+https://github.com/mcontrerasmalpar-pixel/QuechuaTok.git"
+```
+
+From a clone:
+
+```bash
+pip install -e .
+```
+
+```python
+from quechuatok import segment_prpe, PrpeTokenizer
+
+segment_prpe("purisqanchikmanta")
+# ['puri', 'sqa', 'nchik', 'manta']
+
+tok = PrpeTokenizer()
+tok.tokenize("wasipi rimani")
+# ['wasi', 'pi', 'rima', 'ni']
+```
+
+`python eval/score_morphacc_prpe.py` still prints `PRPE MorphAcc%: 83.33` on the
+15-word gold set. The notebook is unchanged.
+
 ## Why this matters
 
 Quechua words are built by stacking many suffixes onto a root
@@ -99,6 +127,8 @@ Gold for `munakuwarqanki` is `muna | ku | wa | rqa | nki` (notebook examples; BP
 
 ## Repository contents
 
+- [`quechuatok/`](quechuatok/) — installable PRPE package (`pip install -e .`)
+- [`pyproject.toml`](pyproject.toml) — package metadata
 - [`QuechuaTok_v5_final.ipynb`](QuechuaTok_v5_final.ipynb) — end-to-end pipeline:
   1. Corpus download (HuggingFace `datasets`)
   2. Preprocessing and filtering
