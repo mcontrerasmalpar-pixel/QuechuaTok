@@ -17,7 +17,23 @@ PAPER_GOLD = HERE / "morphacc_gold.json"
 
 
 def _load(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    """Load a gold JSON; if it lists `parts`, concatenate those JSONL/JSON shards."""
+    gold = json.loads(path.read_text(encoding="utf-8"))
+    parts = gold.get("parts")
+    if not parts:
+        return gold
+    items = []
+    base = path.parent
+    for rel in parts:
+        p = base / rel
+        text = p.read_text(encoding="utf-8")
+        if p.suffix == ".jsonl":
+            items.extend(json.loads(line) for line in text.splitlines() if line.strip())
+        else:
+            chunk = json.loads(text)
+            items.extend(chunk if isinstance(chunk, list) else chunk["items"])
+    gold["items"] = items
+    return gold
 
 
 def score(gold: dict, suffixes: list[str], *, verbose: bool) -> list[float]:
