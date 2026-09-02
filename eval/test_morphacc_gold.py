@@ -10,7 +10,22 @@ HERE = Path(__file__).resolve().parent
 
 
 def _load(name: str) -> dict:
-    return json.loads((HERE / name).read_text(encoding="utf-8"))
+    path = HERE / name
+    gold = json.loads(path.read_text(encoding="utf-8"))
+    parts = gold.get("parts")
+    if not parts:
+        return gold
+    items = []
+    for rel in parts:
+        p = path.parent / rel
+        text = p.read_text(encoding="utf-8")
+        if p.suffix == ".jsonl":
+            items.extend(json.loads(line) for line in text.splitlines() if line.strip())
+        else:
+            chunk = json.loads(text)
+            items.extend(chunk if isinstance(chunk, list) else chunk["items"])
+    gold["items"] = items
+    return gold
 
 
 def test_paper_15_frozen() -> None:
@@ -36,6 +51,7 @@ def test_gold_500_shape() -> None:
     assert len(set(words)) == 500
     for it in items:
         assert "".join(it["morphemes"]) == it["word"], it["word"]
+    # Paper 15 are the prefix and are byte-identical.
     for a, b in zip(gold15["items"], items[:15], strict=True):
         assert a["word"] == b["word"]
         assert a["morphemes"] == b["morphemes"]
