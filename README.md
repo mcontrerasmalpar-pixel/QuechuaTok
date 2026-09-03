@@ -43,6 +43,13 @@ tok.tokenize("wasipi rimani")
 `python eval/score_morphacc_prpe.py` still prints `PRPE MorphAcc%: 83.33` on the
 15-word gold set. The notebook is unchanged.
 
+For the expanded set (issue #9):
+
+```bash
+python eval/score_morphacc_prpe.py --gold eval/morphacc_gold_500.json
+python eval/test_morphacc_gold.py
+```
+
 ## Why this matters
 
 Quechua words are built by stacking many suffixes onto a root
@@ -79,8 +86,18 @@ standard derived from the SQUOIA finite-state morphological analyzer
 
 1. **Fertility rate** — average number of tokens produced per word (lower = more compact).
 2. **OOV%** — percentage of tokens mapped to the unknown token.
-3. **Morphological boundary accuracy (MorphAcc%)** — overlap between a tokenizer's predicted segment boundaries and a 15-word gold-standard set of Quechua verb/noun forms, cross-checked against SQUOIA analyzer output.
+3. **Morphological boundary accuracy (MorphAcc%)** — overlap between a tokenizer's predicted segment strings and a gold set of Quechua verb/noun forms. The **paper table uses the frozen 15-word set** in `eval/morphacc_gold.json` (SQUOIA FST + manual). `eval/morphacc_gold_500.json` is the expanded treebank gold (issue #9); it does **not** replace the paper number.
 4. **Bigram perplexity** — held-out perplexity of a simple bigram language model built on top of each tokenizer's output, as a proxy for how predictable the resulting token sequences are.
+
+### MorphAcc-500
+
+`eval/morphacc_gold.json` stays frozen so `python eval/score_morphacc_prpe.py` still reports **83.33%**.
+
+`eval/morphacc_gold_500.json` keeps those 15 items as a prefix and adds 485 wordforms reconstructed from the [SQUOIA Quechua treebank CoNLL](https://github.com/a-rios/squoia/releases/tag/31-07-2015) (Cuzco `quz`, 31-07-2015 release). The CoNLL is already morpheme-tokenized (`ka` + `-ni` → `kani`). This is **treebank gold**, not FST silver. SQUOIA sometimes fuses derivational morphology into the stem token (`suyukuna|manta`); those splits are kept as annotated.
+
+Sampling (seed 42, stem round-robin): simplex Quechua, Spanish loans + suffixes, evidential stacks, 3-morph and 4+ morph words, noun case, verb person, PRPE-OOV suffixes, and Gregorio Condori oral forms.
+
+PRPE is **expected to drop** on 500 (preview ~39% vs 83.33% on 15). That is the point of #9. Rebuild with `python eval/build_morphacc_gold_500.py` (downloads the published zip).
 
 ## Results
 
@@ -95,6 +112,8 @@ standard derived from the SQUOIA finite-state morphological analyzer
 | Unigram 8k   | 1.9533      | 0.0    | 26.67       |
 | Unigram 16k  | 1.6378      | 0.0    | 33.33       |
 | **PRPE**     | 1.7971      | 0.0 *(by design)* | **83.33** |
+
+Paper MorphAcc column is the 15-word set. Do not overwrite it with MorphAcc-500.
 
 ### Full benchmark (fertility + morphology + perplexity)
 
@@ -139,7 +158,7 @@ Gold for `munakuwarqanki` is `muna | ku | wa | rqa | nki` (notebook examples; BP
   7. Final benchmark table across all metrics
   8. SQUOIA finite-state analyzer setup (Rios, 2016) and silver-standard morphological evaluation
   9. Bigram perplexity evaluation
-- [`eval/`](eval/) — 15-word MorphAcc gold set, PRPE suffix lexicon, and a script to recompute PRPE MorphAcc without training
+- [`eval/`](eval/) — MorphAcc gold (`morphacc_gold.json` = frozen 15; `morphacc_gold_500.json` = treebank 500), PRPE suffix lexicon, scorer, and builder
 - [`LICENSE`](LICENSE) — MIT
 - [`CITATION.cff`](CITATION.cff)
 - [`requirements.txt`](requirements.txt)
@@ -151,6 +170,8 @@ Trained SentencePiece / WordPiece binaries are **not** checked in. The notebook 
 ```bash
 pip install -r requirements.txt
 python eval/score_morphacc_prpe.py
+python eval/score_morphacc_prpe.py --gold eval/morphacc_gold_500.json
+python eval/test_morphacc_gold.py
 ```
 
 Then open and run `QuechuaTok_v5_final.ipynb` top to bottom (originally on Kaggle; needs internet). It will:
@@ -179,5 +200,6 @@ If you use this work, please cite:
 ## References
 
 - Rios, A. (2016). *A Basic Language Technology Toolkit for Quechua.* — [SQUOIA repository](https://github.com/ariosquoia/squoia)
+- SQUOIA Quechua treebank (CoNLL/PML), 31-07-2015: https://github.com/a-rios/squoia/releases/tag/31-07-2015
 
 **Links:** [arXiv](https://arxiv.org/abs/2606.23943) | [GitHub](https://github.com/mcontrerasmalpar-pixel/QuechuaTok) | [Kaggle](https://www.kaggle.com/code/macmaky/quechuatok)

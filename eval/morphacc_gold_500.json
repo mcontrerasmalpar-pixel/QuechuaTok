@@ -1,0 +1,38 @@
+{
+  "source": "Original 15 locked from morphacc_gold.json (SQUOIA FST + manual). Remaining 485 sampled from SQUOIA Quechua treebank CoNLL (a-rios/squoia release 31-07-2015). Morphemes reconstructed from hyphen-suffix CoNLL tokens, NFC lowercased. Gold, not FST silver.",
+  "n_words": 500,
+  "metric": "morpheme_boundary_accuracy = |pred_morphemes ∩ silver_morphemes| / |silver_morphemes| (string overlap, not character offsets)",
+  "sampling": {
+    "seed": 42,
+    "treebank": "https://github.com/a-rios/squoia/releases/download/31-07-2015/SQUOIA_quz_treebanks_31-07-2015.zip",
+    "variety": "quz (Cuzco), SQUOIA QIIC",
+    "locked_paper_15": true,
+    "stem_diversity": true,
+    "strata": {
+      "simplex_quechua": 25,
+      "loan_plus_suffix": 45,
+      "evidential_stack": 60,
+      "four_plus_morphs": 80,
+      "three_morphs": 85,
+      "noun_case_2": 50,
+      "verb_person_2": 50,
+      "prpe_oov_suffix": 50,
+      "gregorio_oral_3plus": 40
+    }
+  },
+  "parts": [
+    "morphacc_gold_500/part_00.jsonl",
+    "morphacc_gold_500/part_01.jsonl",
+    "morphacc_gold_500/part_02.jsonl",
+    "morphacc_gold_500/part_03.jsonl",
+    "morphacc_gold_500/part_04.jsonl",
+    "morphacc_gold_500/part_05.jsonl",
+    "morphacc_gold_500/part_06.jsonl",
+    "morphacc_gold_500/part_07.jsonl",
+    "morphacc_gold_500/part_08.jsonl",
+    "morphacc_gold_500/part_09.jsonl",
+    "morphacc_gold_500/part_10.jsonl",
+    "morphacc_gold_500/part_11.jsonl",
+    "morphacc_gold_500/part_12.jsonl"
+  ]
+}
