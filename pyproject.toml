@@ -20,6 +20,15 @@ classifiers = [
     "Topic :: Text Processing :: Linguistic",
 ]
 
+[project.optional-dependencies]
+mlm = [
+    "torch>=2.0",
+    "transformers>=4.40",
+    "datasets>=2.14",
+    "accelerate>=0.27",
+    "pytest>=7.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/mcontrerasmalpar-pixel/QuechuaTok"
 Paper = "https://arxiv.org/abs/2606.23943"
