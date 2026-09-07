@@ -50,6 +50,37 @@ python eval/score_morphacc_prpe.py --gold eval/morphacc_gold_500.json
 python eval/test_morphacc_gold.py
 ```
 
+## QuechuaBERT (scaffold)
+
+Issue [#8](https://github.com/mcontrerasmalpar-pixel/QuechuaTok/issues/8): small masked LM on Southern Quechua using the **same PRPE segmentation** as the installable package.
+
+Base install stays light (no torch). For MLM:
+
+```bash
+pip install -e ".[mlm]"
+```
+
+Smoke train (local corpus file, few steps):
+
+```bash
+printf '%s\n' 'wasipi rimani' 'purisqanchikmanta hamuni' 'wasiykikunapiqa kachkan' > /tmp/qu_smoke.txt
+python scripts/train_quechuabert.py --corpus-file /tmp/qu_smoke.txt --max-samples 100 --max-steps 5 --output-dir models/quechuabert-smoke
+```
+
+Offline unit smoke:
+
+```bash
+pytest tests/test_quechuabert_smoke.py -q
+```
+
+Full corpus (needs network + GPU recommended):
+
+```bash
+python scripts/train_quechuabert.py --max-samples 50000 --max-steps 5000 --output-dir models/quechuabert
+```
+
+Optional Hub upload after a real train: `--push-to-hub --hub-model-id YOUR_USER/quechuabert` and cite [arXiv:2606.23943](https://arxiv.org/abs/2606.23943) on the model card. This scaffold does **not** ship a finished Hub model.
+
 ## Why this matters
 
 Quechua words are built by stacking many suffixes onto a root
